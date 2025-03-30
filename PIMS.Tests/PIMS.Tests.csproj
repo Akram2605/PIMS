@@ -20,4 +20,11 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PIMS.Domain\PIMS.Domain.csproj" />
+    <ProjectReference Include="..\PIMS.Application\PIMS.Application.csproj" />
+    <ProjectReference Include="..\PIMS.Infrastructure\PIMS.Infrastructure.csproj" />
+    <ProjectReference Include="..\PIMS.API\PIMS.API.csproj" />
+  </ItemGroup>
+
 </Project>

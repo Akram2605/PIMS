@@ -483,3 +483,6 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 .idea/
+
+PIMS.API/appsettings.Development.json
+

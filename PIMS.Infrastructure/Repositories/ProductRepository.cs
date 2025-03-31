@@ -7,9 +7,10 @@ namespace PIMS.Infrastructure.Repositories;
 
 public class ProductRepository (PimsDbContext pimsDbContext) : IProductRepository
 {
-    public async Task AddProductAsync(Product product, CancellationToken cancellationToken)
+    public async Task<Guid> AddProductAsync(Product product, CancellationToken cancellationToken)
     {
         await pimsDbContext.Products.AddAsync(product,cancellationToken);
+        return product.Id;
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
@@ -23,16 +24,19 @@ public class ProductRepository (PimsDbContext pimsDbContext) : IProductRepositor
        return products;
     }
 
-    public async Task<Product?> FindProductByProductIdAsync(Guid productId, CancellationToken cancellationToken)
+    public async Task<Product?> GetProductByProductIdAsync(Guid productId, CancellationToken cancellationToken)
     { 
-        var product = await pimsDbContext.Products.Where(p => p.Id == productId).SingleOrDefaultAsync(cancellationToken: cancellationToken);
+        var product = await pimsDbContext.Products.Where(p => p.Id == productId).SingleOrDefaultAsync( cancellationToken);
         return product;
     }
 
     public async Task RemoveProductByIdAsync(Guid productId, CancellationToken cancellationToken)
     {
-        var product = await pimsDbContext.Products.Include(p => p.Id == productId).SingleOrDefaultAsync(cancellationToken);
+        var product = await pimsDbContext.Products.Where(p => p.Id == productId).SingleOrDefaultAsync( cancellationToken);
 
-        if (product != null) pimsDbContext.Products!.Remove(product);
+        if (product != null)
+        {
+            pimsDbContext.Products!.Remove(product);
+        }
     }
 }

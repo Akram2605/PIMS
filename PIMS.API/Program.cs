@@ -101,6 +101,11 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IInventoryTransactionRepository, InventoryTransactionRepository>();
+builder.Services.AddScoped<IPriceAdjustmentRepository, PriceAdjustmentRepository>();
+builder.Services.AddScoped<ICategoryRepository,CategoryRepository >();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 

@@ -10,7 +10,7 @@ namespace PIMS.Infrastructure.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.Property(p => p.SKU)
+            builder.Property(p => p.Sku)
                 .IsRequired()
                 .HasMaxLength(50);
 
@@ -21,7 +21,7 @@ namespace PIMS.Infrastructure.Configurations
             builder.Property(p => p.Price)
                 .HasPrecision(18, 2);
 
-            builder.HasIndex(p => p.SKU)
+            builder.HasIndex(p => p.Sku)
                 .IsUnique();
 
             builder.HasMany(p => p.ProductCategories)

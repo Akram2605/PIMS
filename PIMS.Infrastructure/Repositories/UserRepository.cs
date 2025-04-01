@@ -16,6 +16,11 @@ public class UserRepository(PimsDbContext pimsDbContext) : IUserRepository
     {
         await pimsDbContext.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task<List<User>> GetAllUsersAsync( CancellationToken cancellationToken)
+    {
+        return await pimsDbContext.Users.ToListAsync(cancellationToken);
+    }
 
     public async Task<User?> FindUserByEmailAsync(string email, CancellationToken cancellationToken)
     {

@@ -7,9 +7,10 @@ using PIMS.Domain.Entities;
 
 namespace PIMS.API.Controllers
 {
-    [Authorize]
-    [Route("api/inventory")]
     [ApiController]
+    [Route("api/v{version:apiVersion}/inventory")]
+    [ApiVersion("1.0")]
+    [Authorize]
     public class InventoryController(IMediator mediator) : ControllerBase
     {
         [HttpGet]
@@ -28,13 +29,15 @@ namespace PIMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] AddInventoryCommand command)
         {
             var result = await mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            return Created(string.Empty, result.Id);
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateInventoryCommand command)
         {
             command.Id = id;

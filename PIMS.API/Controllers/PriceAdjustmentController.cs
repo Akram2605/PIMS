@@ -7,9 +7,11 @@ using PIMS.Domain.Entities;
 
 namespace PIMS.API.Controllers
 {
-    [Authorize]
-    [Route("api/price-adjustments")]
     [ApiController]
+    [Route("api/v{version:apiVersion}/price-adjustments")]
+    [ApiVersion("1.0")]
+    [Authorize]
+    
     public class PriceAdjustmentController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,10 +37,11 @@ namespace PIMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] AddPriceAdjustmentCommand command)
         {
             var result = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            return Created(string.Empty, result.Id);
         }
     }
 }

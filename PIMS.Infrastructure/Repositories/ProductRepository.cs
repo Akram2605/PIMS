@@ -37,6 +37,8 @@ public class ProductRepository (PimsDbContext pimsDbContext) : IProductRepositor
         if (product != null)
         {
             pimsDbContext.Products!.Remove(product);
+            await pimsDbContext.SaveChangesAsync(cancellationToken);
+            
         }
     }
 }

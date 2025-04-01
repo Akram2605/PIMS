@@ -7,9 +7,11 @@ using PIMS.Domain.Entities;
 
 namespace PIMS.API.Controllers
 {
-    [Authorize]
-    [Route("api/categories")]
     [ApiController]
+    [Route("api/v{version:apiVersion}/categories")]
+    [ApiVersion("1.0")]
+    [Authorize]
+    
     public class CategoryController(IMediator mediator) : ControllerBase
     {
         [HttpGet]
@@ -28,6 +30,7 @@ namespace PIMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
         {
             var category = await mediator.Send(command);
@@ -35,6 +38,7 @@ namespace PIMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryCommand command)
         {
             command.Id = id;
@@ -45,6 +49,7 @@ namespace PIMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var success = await mediator.Send(new DeleteCategoryCommand { Id = id });

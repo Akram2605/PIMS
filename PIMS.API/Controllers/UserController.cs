@@ -9,7 +9,9 @@ namespace PIMS.API.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/users")]
+[Route("api/v{version:apiVersion}/users")]
+[ApiVersion("1.0")]
+
 public class UserController(IMediator mediator) : ControllerBase
 {
     [AllowAnonymous]
@@ -28,6 +30,15 @@ public class UserController(IMediator mediator) : ControllerBase
         if (token == "Invalid email or password") return Unauthorized();
         return Ok(new { Token = token });
     }
+    
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = await mediator.Send(new GetAllUsersQuery() );
+        return Ok(users);
+    }
+    
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(Guid id)
@@ -37,6 +48,7 @@ public class UserController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         var result = await mediator.Send(new DeleteUserCommand { UserId = id });

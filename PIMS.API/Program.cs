@@ -6,27 +6,34 @@ using MediatR;
 using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc;
 using PIMS.Infrastructure.DbContexts;
 using PIMS.Application;
 using PIMS.Domain.Entities;
 using PIMS.Domain.Repositories;
-using PIMS.Infrastructure.Repositories; // Ensure CQRS services are added
+using PIMS.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
 
+// ✅ Register Database Context
 builder.Services.AddDbContext<PimsDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-var jwtKey = configuration["Jwt:Key"];
-if (string.IsNullOrEmpty(jwtKey))
+// ✅ Configure JWT Authentication
+var jwtSettings = configuration.GetSection("Jwt");
+if (string.IsNullOrEmpty(jwtSettings["Key"]) || 
+    string.IsNullOrEmpty(jwtSettings["Issuer"]) || 
+    string.IsNullOrEmpty(jwtSettings["Audience"]))
 {
-    throw new Exception("JWT Key is missing! Check appsettings.json or environment variables.");
+    throw new Exception("JWT configuration is missing required values!");
 }
 
-var key = Encoding.UTF8.GetBytes(jwtKey);
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -37,8 +44,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = configuration["Jwt:Issuer"],
-            ValidAudience = configuration["Jwt:Audience"],
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ClockSkew = TimeSpan.FromMinutes(5)
         };
@@ -52,22 +59,52 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
             OnTokenValidated = context =>
             {
-                var claims = context.Principal.Claims.ToList();
-                Console.WriteLine("Token Claims:");
-                foreach (var claim in claims)
+                var claims = context.Principal?.Claims.ToList();
+                if (claims != null)
                 {
-                    Console.WriteLine($"{claim.Type}: {claim.Value}");
+                    Console.WriteLine("Token Claims:");
+                    claims.ForEach(claim => Console.WriteLine($"{claim.Type}: {claim.Value}"));
                 }
                 return Task.CompletedTask;
             }
         };
     });
 
+// ✅ Register MediatR for CQRS
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(PIMS.Application.AssemblyReference).Assembly));
 
+// ✅ API Versioning Configuration
+builder.Services.AddApiVersioning(options =>
+{
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+});
+
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
+// ✅ Configure Swagger with Versioning
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "PIMS API", Version = "v1" });
+    var provider = builder.Services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+    
+    foreach (var description in provider.ApiVersionDescriptions)
+    {
+        options.SwaggerDoc(description.GroupName, new OpenApiInfo
+        {
+            Title = "PIMS API",
+            Version = description.ApiVersion.ToString(),
+            Description = $"API version {description.ApiVersion}"
+        });
+    }
+    
+    // Add JWT Authorization to Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -77,6 +114,7 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header,
         Description = "Enter 'Bearer {token}'"
     });
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -89,7 +127,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Enable CORS (configure as needed)
+// ✅ Enable CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -100,28 +138,34 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ✅ Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryTransactionRepository, InventoryTransactionRepository>();
 builder.Services.AddScoped<IPriceAdjustmentRepository, PriceAdjustmentRepository>();
-builder.Services.AddScoped<ICategoryRepository,CategoryRepository >();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 var app = builder.Build();
 
-// Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", $"PIMS API {description.GroupName.ToUpper()}");
+        }
+    });
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll"); // Apply CORS policy
-app.UseAuthentication(); // Enable authentication middleware
+app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

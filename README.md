@@ -105,17 +105,93 @@ The **PIMS (Product Inventory Management System)** API is a RESTful backend serv
 7. Access the API via Swagger:
     - [Swagger UI](http://localhost:5085/swagger) or [HTTPS](https://localhost:7017/swagger)
 
+8. First register and login then user token for accessing other apis.
+
 ## Endpoints
 
-- **User**:
-    - Create user: `POST /api/v1/users/create`
-    - Get user profile: `GET /api/v1/users/profile`
-    - Delete user: `DELETE /api/v1/users/delete/{id}`
+ 
+**Category Endpoints**
+-GET /api/v1/categories
+-Get a list of categories (Admin & User)
 
-- **Product**:
-    - Create product: `POST /api/v1/products/create`
-    - Get products: `GET /api/v1/products`
-    - Delete product: `DELETE /api/v1/products/{id}`
+-POST /api/v1/categories
+-Create a new category (Admin-only)
+
+-GET /api/v1/categories/{id}
+-Get a category by ID (Admin & User)
+
+-PUT /api/v1/categories/{id}
+-Update an existing category (Admin-only)
+
+-DELETE /api/v1/categories/{id}
+-Delete a category (Admin-only)
+
+**Inventory Endpoints**
+-GET /api/v1/inventory
+-Get a list of inventory items (Admin & User)
+
+-POST /api/v1/inventory
+-Add a new inventory item (Admin-only)
+
+-GET /api/v1/inventory/{id}
+-Get an inventory item by ID (Admin & User)
+
+-PUT /api/v1/inventory/{id}
+-Update an inventory item (Admin-only)
+
+-DELETE /api/v1/inventory/{id}
+-Delete an inventory item (Admin-only)
+
+**Inventory Transaction Endpoints**
+-GET /api/v1/inventory-transactions
+-Get a list of inventory transactions (Admin & User)
+
+-POST /api/v1/inventory-transactions
+-Create a new inventory transaction (Admin-only)
+
+-GET /api/v1/inventory-transactions/{id}
+-Get an inventory transaction by ID (Admin & User)
+
+**Price Adjustment Endpoints**
+-GET /api/v1/price-adjustments
+-Get a list of price adjustments (Admin & User)
+
+-POST /api/v1/price-adjustments
+-Create a new price adjustment (Admin-only)
+
+-GET /api/v1/price-adjustments/{id}
+-Get a price adjustment by ID (Admin & User)
+
+**Product Endpoints**
+-GET /api/v1/products
+-Get a list of products (Admin & User)
+
+-POST /api/v1/products
+-Create a new product (Admin-only)
+
+-GET /api/v1/products/{id}
+-Get a product by ID (Admin & User)
+
+-PUT /api/v1/products/{id}
+-Update an existing product (Admin-only)
+
+-DELETE /api/v1/products/{id}
+-Delete a product (Admin-only)
+
+**User Endpoints**
+-POST /api/v1/users/register
+-Register a new user (User-only)
+
+-POST /api/v1/users/login
+-Login to get a JWT token (User-only)
+
+-GET /api/v1/users/{id}
+-Get user details by ID (Admin & User)
+
+-DELETE /api/v1/users/{id}
+-Delete a user (Admin-only)
+
+
 
 ## License
 

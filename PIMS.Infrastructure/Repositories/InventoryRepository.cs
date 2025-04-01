@@ -7,9 +7,10 @@ namespace PIMS.Infrastructure.Repositories;
 
 public class InventoryRepository(PimsDbContext pimsDbContext) : IInventoryRepository
 {
-    public async Task AddInventoryAsync(Inventory inventory, CancellationToken cancellationToken)
+    public async Task<Inventory> AddInventoryAsync(Inventory inventory, CancellationToken cancellationToken)
     {
         await pimsDbContext.Inventories.AddAsync(inventory,cancellationToken);
+        return inventory;
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)

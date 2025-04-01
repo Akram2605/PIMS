@@ -4,7 +4,7 @@ namespace PIMS.Domain.Repositories;
 
 public interface IInventoryRepository
 {
-    public Task AddInventoryAsync(Inventory inventory, CancellationToken cancellationToken);
+    public Task<Inventory> AddInventoryAsync(Inventory inventory, CancellationToken cancellationToken);
     
     public Task SaveChangesAsync(CancellationToken cancellationToken);
     

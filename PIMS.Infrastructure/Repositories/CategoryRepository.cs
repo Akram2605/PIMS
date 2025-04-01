@@ -7,9 +7,10 @@ namespace PIMS.Infrastructure.Repositories;
 
 public class CategoryRepository (PimsDbContext pimsDbContext) : ICategoryRepository
 {
-    public async Task AddCategoryAsync(Category category, CancellationToken cancellationToken)
+    public async Task<Category> AddCategoryAsync(Category category, CancellationToken cancellationToken)
     {
         await pimsDbContext.Categories.AddAsync(category,cancellationToken);
+        return category;
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
@@ -23,7 +24,7 @@ public class CategoryRepository (PimsDbContext pimsDbContext) : ICategoryReposit
         return categories;
     }
 
-    public async Task<Category?> FindCategoryByCategoryIdAsync(Guid categoryId, CancellationToken cancellationToken)
+    public async Task<Category?> GetCategoryByCategoryIdAsync(Guid categoryId, CancellationToken cancellationToken)
     {
         var categories = await pimsDbContext.Categories.Where(p => p.Id == categoryId).SingleOrDefaultAsync(cancellationToken);
         return categories;

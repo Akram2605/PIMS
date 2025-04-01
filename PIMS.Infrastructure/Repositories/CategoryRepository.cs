@@ -35,5 +35,6 @@ public class CategoryRepository (PimsDbContext pimsDbContext) : ICategoryReposit
         var category = await pimsDbContext.Categories.Include(c => c.Id == categoryId).SingleOrDefaultAsync(cancellationToken);
 
         if (category != null) pimsDbContext.Categories!.Remove(category);
+        await pimsDbContext.SaveChangesAsync(cancellationToken);
     }
 }

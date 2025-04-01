@@ -42,5 +42,6 @@ public class UserRepository(PimsDbContext pimsDbContext) : IUserRepository
         var user = await pimsDbContext.Users.Include(u => u.Id == userId).SingleOrDefaultAsync(cancellationToken);
 
         if (user != null) pimsDbContext.Users!.Remove(user);
+        await pimsDbContext.SaveChangesAsync(cancellationToken);
     }
 }

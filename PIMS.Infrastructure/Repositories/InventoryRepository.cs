@@ -34,5 +34,6 @@ public class InventoryRepository(PimsDbContext pimsDbContext) : IInventoryReposi
     {
         var inventory = await pimsDbContext.Inventories.Where(i => i.Id == inventoryId).SingleOrDefaultAsync(cancellationToken);
         if (inventory != null) pimsDbContext.Inventories!.Remove(inventory);
+        await pimsDbContext.SaveChangesAsync(cancellationToken);
     }
 }
